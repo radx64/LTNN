@@ -3,9 +3,9 @@ library(cvTools);
 library(caret);
 library(nnet);
 
-filename <- "/home/radek/Pulpit/LTNN/data.csv";
-maxNumOfAtribs <- 12;
-numOfValidationRepetition <- 10;
+filename <- "data.csv";
+maxNumOfAtribs <- 20;
+numOfValidationRepetition <- 25;
 
 ATmGM <- read.csv(filename);
 
@@ -19,7 +19,7 @@ FirstDataSet_1E <- FirstDataSet[cols];
 cat("Preparing attributes ranking...                                                            \r");
 ranking <- relief(ClassificationGroup + PatientNo ~ ., data = FirstDataSet_1E, neighbours.count = 10, sample.size = 20);
 
-for(numOfAtribs in 8:maxNumOfAtribs)
+for(numOfAtribs in 1:maxNumOfAtribs)
 {
   cat("Selecting best atributes from ranklist...                                                   \r");
   rankcut <- cutoff.k(ranking, numOfAtribs);
@@ -29,11 +29,11 @@ for(numOfAtribs in 8:maxNumOfAtribs)
   hits <- 0;
   tries <- 0;
   
-  folds1 <- cvFolds(NROW(FirstDataSet_1E_SelectedRanks), K = numOfValidationRepetition);
   for(repetiton in 1:numOfValidationRepetition)
   {
-    train1 <- FirstDataSet_1E_SelectedRanks[folds1$subsets[folds1$which != repetiton], ]; # zbior testowy
-    validation1 <- FirstDataSet_1E_SelectedRanks[folds1$subsets[folds1$which == repetiton], ]; # zbor testujacy
+    folds1 <- cvFolds(NROW(FirstDataSet_1E_SelectedRanks), K = 4);
+    train1 <- FirstDataSet_1E_SelectedRanks[folds1$subsets[folds1$which != 4], ]; # zbior trenujący
+    validation1 <- FirstDataSet_1E_SelectedRanks[folds1$subsets[folds1$which == 4], ]; # zbor testujacy
     
     #ann1 <- nnet(as.factor(ClassificationGroup) ~ ., data = train1, size = 21, decay = 0); # atrybut size podobnie jak poprzednio
     output <- sprintf("Training neural network [%3d%%]                                  \r", repetiton*100/numOfValidationRepetition)
