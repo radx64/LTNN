@@ -34,25 +34,23 @@ for(numOfAtribs in 1:maxNumOfAtribs)
     folds1 <- cvFolds(NROW(FirstDataSet_1E_SelectedRanks), K = 4);
     train1 <- FirstDataSet_1E_SelectedRanks[folds1$subsets[folds1$which != 4], ]; # zbior trenujący
     validation1 <- FirstDataSet_1E_SelectedRanks[folds1$subsets[folds1$which == 4], ]; # zbor testujacy
-    
-    #ann1 <- nnet(as.factor(ClassificationGroup) ~ ., data = train1, size = 21, decay = 0); # atrybut size podobnie jak poprzednio
+    tabela <- 0;
     output <- sprintf("Training neural network [%3d%%]                                  \r", repetiton*100/numOfValidationRepetition)
     cat(output);
-    ann1 <- train(train1, as.factor(train1$ClassificationGroup), method = "nnet", 
+    ann1 <- train(train1[!colnames(train1) %in% "ClassificationGroup"], as.factor(train1$ClassificationGroup), method = "nnet", 
         tuneGrid=data.frame(.size = 20, .decay = 0 ),  # atrybut size wyliczasz za pomocą wzoru: (ilość cech wejściowych + ilość wyjściowych klas)/2
-        # ewentualnie przy testowaniu sprawdzacz czy size+1, size+2, itd. ale bez przesady, są lepsze
         trControl = trainControl(method = "repeatedcv", number = 2, repeats = 5, verbose = FALSE), 
         tuneLength = 10,
         verbose = FALSE,
         trace = FALSE);
   
-    #pred1 <- predict(ann1, newdata = validation1, type = "class");
+
     cat("Predicting result...                                                                    \r");
     pred1 <- predict(ann1, newdata = validation1, type = "raw");
     
     tabela <- table(validation1$ClassificationGroup,pred1);
     
-    for(row in 1:maxNumOfAtribs)
+    for(row in 1:20)
     {
       currentColRow <- as.character(row)
       if( currentColRow %in% rownames(tabela))
@@ -71,6 +69,7 @@ for(numOfAtribs in 1:maxNumOfAtribs)
         #output <- sprintf("No row named %d found.",row); print(output);
       }
     }
+
     tries <- tries + sum(tabela);
     
   }
