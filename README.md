@@ -1,4 +1,4 @@
 LTNN
 ====
 
-Leukemia type naural network
+Leukemia type detection neural network
